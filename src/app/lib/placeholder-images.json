@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero",
+      "description": "Cinematic sci-fi scene",
+      "imageUrl": "https://picsum.photos/seed/viral1/1200/600",
+      "imageHint": "cinematic sci-fi"
+    },
+    {
+      "id": "project-1",
+      "description": "Cyberpunk character consistency",
+      "imageUrl": "https://picsum.photos/seed/viral2/400/300",
+      "imageHint": "cyberpunk portrait"
+    },
+    {
+      "id": "project-2",
+      "description": "Ethereal forest scene",
+      "imageUrl": "https://picsum.photos/seed/viral3/400/300",
+      "imageHint": "ethereal forest"
+    }
+  ]
+}
