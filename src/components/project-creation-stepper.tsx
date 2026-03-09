@@ -3,14 +3,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   Sparkles, 
-  ArrowRight, 
   ArrowLeft, 
   Type, 
   Image as ImageIcon, 
@@ -39,7 +37,6 @@ export function ProjectCreationStepper() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // State for project data
   const [inputData, setInputData] = useState({ text: "", media: null as string | null });
   const [scriptData, setScriptData] = useState<any>(null);
   const [config, setConfig] = useState({
@@ -195,7 +192,7 @@ export function ProjectCreationStepper() {
                 className="bg-accent hover:bg-accent/90 text-white font-bold h-12 px-8 rounded-xl glowing-accent"
               >
                 {loading ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2 w-5 h-5" />}
-                Improve Idea with AI
+                Improve Idea
               </Button>
             </div>
           </div>
@@ -206,8 +203,8 @@ export function ProjectCreationStepper() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-headline font-bold">AI Refined Script</h2>
-              <p className="text-muted-foreground">The AI has expanded your idea into a production-ready script.</p>
+              <h2 className="text-3xl font-headline font-bold">Refined Script</h2>
+              <p className="text-muted-foreground">The vision has been expanded into a production-ready script.</p>
             </div>
             <Button variant="ghost" onClick={() => setStep("input")}><ArrowLeft className="mr-2" /> Back</Button>
           </div>
@@ -239,12 +236,12 @@ export function ProjectCreationStepper() {
             <div className="space-y-6">
               <div className="bg-primary/5 p-6 rounded-2xl border border-primary/20">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-primary">
-                  <Settings2 /> Character Profile
+                  <Settings2 /> Profile consistency
                 </h3>
                 <div className="space-y-4">
                   {scriptData.characterDescriptions.map((char: string, i: number) => (
                     <div key={i} className="text-sm text-muted-foreground">
-                      <p className="font-semibold text-foreground mb-1">Character {i + 1}:</p>
+                      <p className="font-semibold text-foreground mb-1">Subject {i + 1}:</p>
                       {char}
                     </div>
                   ))}
@@ -342,7 +339,7 @@ export function ProjectCreationStepper() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-headline font-bold">Visual Grid References</h2>
-              <p className="text-muted-foreground">The AI engine has drafted initial reference scenes.</p>
+              <p className="text-muted-foreground">Drafted initial reference scenes based on the script.</p>
             </div>
             <Button variant="ghost" onClick={() => setStep("config")}><ArrowLeft className="mr-2" /> Back</Button>
           </div>
@@ -381,7 +378,7 @@ export function ProjectCreationStepper() {
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setStep("grid")}><ArrowLeft className="mr-2" /> Back</Button>
-              <Badge className="bg-accent h-6">DNA CONSISTENCY ACTIVE</Badge>
+              <Badge className="bg-accent h-6">VISUAL CONSISTENCY ACTIVE</Badge>
             </div>
           </div>
 
