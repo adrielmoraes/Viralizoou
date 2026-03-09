@@ -3,6 +3,8 @@ import { Video, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectCreationStepper } from "@/components/project-creation-stepper";
 
+export const maxDuration = 120; // Aumentado para suportar gerações múltiplas de imagens e vídeos
+
 export default function NewProjectPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -19,11 +21,11 @@ export default function NewProjectPage() {
             </div>
             <span className="text-xl font-headline font-bold">Viralizoou</span>
             <span className="text-muted-foreground mx-2">/</span>
-            <span className="text-muted-foreground font-medium">New Project</span>
+            <span className="text-muted-foreground font-medium">Novo Projeto</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="outline" className="text-xs h-9">Save as Draft</Button>
+          <Button variant="outline" className="text-xs h-9">Salvar Rascunho</Button>
         </div>
       </header>
 

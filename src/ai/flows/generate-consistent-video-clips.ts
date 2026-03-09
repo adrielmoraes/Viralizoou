@@ -49,41 +49,49 @@ const generateConsistentVideoClipsFlow = ai.defineFlow(
           ],
         });
         operation = generateResponse.operation;
-      } catch (error) {
-        throw new Error('Falha ao iniciar motor de vídeo.');
+      } catch (error: any) {
+        console.error('Erro ao iniciar geração de vídeo:', error?.message || error);
+        continue;
       }
 
-      if (!operation) {
-        throw new Error('Processamento de vídeo não disponível no momento.');
-      }
+      if (!operation) continue;
 
+      // Aguardar conclusão da operação
       while (!operation.done) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
         operation = await ai.checkOperation(operation);
       }
 
       if (operation.error) {
-        throw new Error(`Erro no motor: ${operation.error.message}`);
+        console.error(`Erro no motor de vídeo: ${operation.error.message}`);
+        continue;
       }
 
       const videoMediaPart = operation.output?.message?.content.find((p) => !!p.media && p.media.contentType?.startsWith('video/'));
 
-      if (!videoMediaPart || !videoMediaPart.media?.url) {
-        throw new Error('Conteúdo visual não encontrado.');
+      if (!videoMediaPart || !videoMediaPart.media?.url) continue;
+
+      try {
+        const videoDownloadResponse = await fetch(`${videoMediaPart.media.url}&key=${process.env.GEMINI_API_KEY}`);
+
+        if (!videoDownloadResponse.ok) {
+          console.error('Falha ao baixar vídeo gerado.');
+          continue;
+        }
+
+        const videoArrayBuffer = await videoDownloadResponse.arrayBuffer();
+        const videoBuffer = Buffer.from(videoArrayBuffer);
+        const base64Video = videoBuffer.toString('base64');
+        const contentType = videoMediaPart.media.contentType || 'video/mp4';
+
+        videoDataUris.push(`data:${contentType};base64,${base64Video}`);
+      } catch (e) {
+        console.error('Erro ao processar buffer de vídeo:', e);
       }
+    }
 
-      const fetch = (await import('node-fetch')).default;
-      const videoDownloadResponse = await fetch(`${videoMediaPart.media.url}&key=${process.env.GEMINI_API_KEY}`);
-
-      if (!videoDownloadResponse.ok || !videoDownloadResponse.body) {
-        throw new Error('Falha ao capturar o resultado visual.');
-      }
-
-      const videoBuffer = await (videoDownloadResponse as any).buffer();
-      const base64Video = videoBuffer.toString('base64');
-      const contentType = videoMediaPart.media.contentType || 'video/mp4';
-
-      videoDataUris.push(`data:${contentType};base64,${base64Video}`);
+    if (videoDataUris.length === 0) {
+      throw new Error('Não foi possível gerar os movimentos visuais solicitados.');
     }
 
     return videoDataUris;
