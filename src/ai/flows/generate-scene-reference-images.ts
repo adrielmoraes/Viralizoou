@@ -43,27 +43,31 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
     outputSchema: GenerateSceneReferenceImagesOutputSchema,
   },
   async (input) => {
-    const { scriptDetails, gridFormat, aspectRatio, resolution } = input;
+    const { scriptDetails, gridFormat, aspectRatio } = input;
     const numberOfScenes = getNumberOfScenes(gridFormat);
-    const sceneDescriptionsToUse = scriptDetails.sceneDescriptions.slice(0, numberOfScenes);
-    const characterDescription = scriptDetails.characterDescription;
+    const sceneDescriptionsToUse = (scriptDetails.sceneDescriptions || []).slice(0, numberOfScenes);
+    const characterDescription = scriptDetails.characterDescription || "Um personagem central";
 
     const referenceImageUrls: string[] = [];
 
     for (let i = 0; i < sceneDescriptionsToUse.length; i++) {
-      const scenePrompt = `Cinematic high-quality scene for: "${sceneDescriptionsToUse[i]}". Main character: "${characterDescription}". Aspect ratio: ${aspectRatio}. Professional lighting.`;
+      const scenePrompt = `Cinematic high-quality scene for: "${sceneDescriptionsToUse[i]}". Main character: "${characterDescription}". Aspect ratio: ${aspectRatio}. Professional lighting, 8k resolution, photorealistic style.`;
 
-      // Usando Imagen 4 para geração de imagem de alta qualidade
+      // Usando Imagen 3 para maior estabilidade na geração inicial
       const { media } = await ai.generate({
-        model: 'googleai/imagen-4.0-fast-generate-001',
+        model: 'googleai/imagen-3.0-generate-001',
         prompt: scenePrompt,
       });
 
       if (media && media.url) {
         referenceImageUrls.push(media.url);
       } else {
-        throw new Error(`Falha ao gerar imagem de referência para a cena ${i+1}.`);
+        throw new Error(`Falha ao gerar imagem para a cena ${i+1}.`);
       }
+    }
+
+    if (referenceImageUrls.length === 0) {
+      throw new Error("Nenhuma imagem pôde ser gerada.");
     }
 
     return { referenceImageUrls };

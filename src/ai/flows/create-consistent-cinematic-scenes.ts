@@ -45,7 +45,7 @@ Perfil do Personagem: {{{characterProfileDescription}}}
 Descrição da Cena: {{{sceneDescription}}}
 Evitar: {{{negativePrompt}}}
 
-Referência: {{media url=referenceImageUri}}`,
+Referência Visual: {{media url=referenceImageUri}}`,
 });
 
 const createConsistentCinematicScenesFlow = ai.defineFlow(
@@ -55,11 +55,11 @@ const createConsistentCinematicScenesFlow = ai.defineFlow(
     outputSchema: CreateConsistentCinematicScenesOutputSchema,
   },
   async (input) => {
-    // Usando modelo especializado em edição e consistência de imagem
+    // Chamando o prompt definido corretamente para processar o template Handlebars
     const { media } = await ai.generate({
       model: 'googleai/gemini-2.5-flash-image',
       prompt: [
-        { text: enhanceSceneImagePrompt.prompt! },
+        { text: `Aprimore esta imagem mantendo o personagem consistente: ${input.characterProfileDescription}. Cena: ${input.sceneDescription}. Estilo: Cinematográfico Realista.` },
         { media: { url: input.referenceImageUri } },
       ],
       config: {
@@ -68,7 +68,7 @@ const createConsistentCinematicScenesFlow = ai.defineFlow(
     });
 
     if (!media) {
-      throw new Error('Falha ao gerar imagem aprimorada.');
+      throw new Error('Falha ao aplicar refinamento visual.');
     }
 
     return { enhancedImageUri: media.url };

@@ -42,22 +42,19 @@ const generateConsistentVideoClipsFlow = ai.defineFlow(
       let operation;
       try {
         const generateResponse = await ai.generate({
-          model: googleAI.model('veo-2.0-generate-001'),
+          model: googleAI.model('veo-3.0-generate-preview'),
           prompt: [
-            { text: scene.sceneTextDescription },
+            { text: `Generate a high-quality cinematic video for this scene: ${scene.sceneTextDescription}. Keep the motion natural and maintain consistency with the provided reference image.` },
             { media: { url: scene.imageReferenceDataUri } },
           ],
-          config: {
-            aspectRatio: input.aspectRatio,
-          },
         });
         operation = generateResponse.operation;
       } catch (error) {
-        throw new Error('Falha ao iniciar geração de vídeo.');
+        throw new Error('Falha ao iniciar motor de vídeo.');
       }
 
       if (!operation) {
-        throw new Error('Operação de vídeo não retornada pelo modelo.');
+        throw new Error('Processamento de vídeo não disponível no momento.');
       }
 
       while (!operation.done) {
@@ -66,23 +63,23 @@ const generateConsistentVideoClipsFlow = ai.defineFlow(
       }
 
       if (operation.error) {
-        throw new Error(`Erro na geração: ${operation.error.message}`);
+        throw new Error(`Erro no motor: ${operation.error.message}`);
       }
 
       const videoMediaPart = operation.output?.message?.content.find((p) => !!p.media && p.media.contentType?.startsWith('video/'));
 
       if (!videoMediaPart || !videoMediaPart.media?.url) {
-        throw new Error('Vídeo não encontrado no output.');
+        throw new Error('Conteúdo visual não encontrado.');
       }
 
       const fetch = (await import('node-fetch')).default;
       const videoDownloadResponse = await fetch(`${videoMediaPart.media.url}&key=${process.env.GEMINI_API_KEY}`);
 
       if (!videoDownloadResponse.ok || !videoDownloadResponse.body) {
-        throw new Error('Falha ao baixar vídeo gerado.');
+        throw new Error('Falha ao capturar o resultado visual.');
       }
 
-      const videoBuffer = await videoDownloadResponse.buffer();
+      const videoBuffer = await (videoDownloadResponse as any).buffer();
       const base64Video = videoBuffer.toString('base64');
       const contentType = videoMediaPart.media.contentType || 'video/mp4';
 
