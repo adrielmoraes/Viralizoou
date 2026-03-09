@@ -17,7 +17,6 @@ import {
   Settings2, 
   Grid2X2,
   Monitor,
-  Maximize2,
   CheckCircle2,
   Loader2,
   ChevronRight,
@@ -118,7 +117,7 @@ export function ProjectCreationStepper() {
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
-      toast({ title: "Erro ao acessar o microfone", variant: "destructive" });
+      toast({ title: "Acesso ao microfone negado.", variant: "destructive" });
     }
   };
 
@@ -137,11 +136,11 @@ export function ProjectCreationStepper() {
 
   const handleProcessIdea = async () => {
     if (inputType === "text" && !inputData.text) {
-      toast({ title: "Por favor, descreva sua ideia primeiro.", variant: "destructive" });
+      toast({ title: "Por favor, descreva sua ideia.", variant: "destructive" });
       return;
     }
     if (inputType !== "text" && !inputData.media) {
-      toast({ title: `Por favor, forneça o arquivo primeiro.`, variant: "destructive" });
+      toast({ title: "Por favor, forneça o arquivo de referência.", variant: "destructive" });
       return;
     }
 
@@ -157,7 +156,7 @@ export function ProjectCreationStepper() {
       setScriptData(result);
       setStep("script");
     } catch (e) {
-      toast({ title: "Não foi possível processar sua visão. Tente novamente.", variant: "destructive" });
+      toast({ title: "Erro no processamento criativo. Tente ajustar sua ideia.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -166,7 +165,7 @@ export function ProjectCreationStepper() {
   const handleGenerateGrid = async () => {
     setLoading(true);
     try {
-      const charDesc = (scriptData.characterDescriptions && scriptData.characterDescriptions[0]) || "A professional subject";
+      const charDesc = (scriptData.characterDescriptions && scriptData.characterDescriptions[0]) || "Main protagonist";
       
       const result = await generateSceneReferenceImages({
         scriptDetails: {
@@ -180,10 +179,9 @@ export function ProjectCreationStepper() {
       setGridImages(result.referenceImageUrls);
       setStep("grid");
     } catch (e: any) {
-      console.error("Erro na geração de grid:", e);
       toast({ 
-        title: "Erro ao criar as imagens iniciais.", 
-        description: e.message || "Tente descrever a cena de outra forma.",
+        title: "Erro ao gerar os esboços visuais.", 
+        description: "Tente descrever a cena de forma diferente ou use menos cenas.",
         variant: "destructive" 
       });
     } finally {
@@ -195,7 +193,7 @@ export function ProjectCreationStepper() {
     setLoading(true);
     try {
       const refined: string[] = [];
-      const charDesc = (scriptData.characterDescriptions && scriptData.characterDescriptions[0]) || "A professional subject";
+      const charDesc = (scriptData.characterDescriptions && scriptData.characterDescriptions[0]) || "Main subject";
 
       for (let i = 0; i < gridImages.length; i++) {
         const res = await createConsistentCinematicScenes({
@@ -210,7 +208,7 @@ export function ProjectCreationStepper() {
       setRefinedImages(refined);
       setStep("refinement");
     } catch (e) {
-      toast({ title: "Erro ao refinar as cenas.", variant: "destructive" });
+      toast({ title: "Erro no refinamento visual.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -230,7 +228,7 @@ export function ProjectCreationStepper() {
       setVideos(res);
       setStep("video");
     } catch (e: any) {
-      toast({ title: "Erro ao gerar os clipes.", description: e.message, variant: "destructive" });
+      toast({ title: "Erro na produção dos clipes.", description: "Houve um problema ao processar o movimento das cenas.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -262,7 +260,7 @@ export function ProjectCreationStepper() {
   const inputTypes = [
     { id: "text" as InputType, icon: Type, label: "Texto", desc: "Descreva sua ideia" },
     { id: "image" as InputType, icon: ImageIcon, label: "Imagem", desc: "Referência visual" },
-    { id: "video" as InputType, icon: VideoIcon, label: "Vídeo", desc: "Inspiração visual" },
+    { id: "video" as InputType, icon: VideoIcon, label: "Vídeo", desc: "Referência de estilo" },
     { id: "audio" as InputType, icon: Mic, label: "Voz", desc: "Grave sua ideia" }
   ];
 
@@ -273,8 +271,8 @@ export function ProjectCreationStepper() {
       {step === "input" && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center">
-            <h2 className="text-4xl font-headline font-bold mb-4">Qual é a sua visão?</h2>
-            <p className="text-muted-foreground">Escolha como deseja iniciar sua produção cinematográfica.</p>
+            <h2 className="text-4xl font-headline font-bold mb-4">Inicie seu Projeto</h2>
+            <p className="text-muted-foreground">Escolha o ponto de partida para sua criação cinematográfica.</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -301,10 +299,10 @@ export function ProjectCreationStepper() {
           <div className="space-y-6 bg-card/30 p-8 rounded-2xl border border-white/5">
             {inputType === "text" ? (
               <div className="space-y-4">
-                <Label htmlFor="idea" className="text-lg font-bold">Descreva seu projeto</Label>
+                <Label htmlFor="idea" className="text-lg font-bold">Visão do Projeto</Label>
                 <Textarea 
                   id="idea" 
-                  placeholder="Ex: Uma cena épica em Marte com luz crepuscular..."
+                  placeholder="Ex: Uma cena de ficção científica em um mercado futurista..."
                   className="min-h-[200px] bg-background border-white/5 focus:ring-primary/20"
                   value={inputData.text}
                   onChange={(e) => setInputData({ ...inputData, text: e.target.value })}
@@ -312,7 +310,7 @@ export function ProjectCreationStepper() {
               </div>
             ) : inputType === "audio" ? (
               <div className="space-y-6 text-center py-8">
-                <Label className="text-lg font-bold block mb-4">Fale sua ideia</Label>
+                <Label className="text-lg font-bold block mb-4">Descreva por Voz</Label>
                 
                 <div className="flex flex-col items-center gap-6">
                   {!inputData.media ? (
@@ -358,7 +356,7 @@ export function ProjectCreationStepper() {
               </div>
             ) : (
               <div className="space-y-4">
-                <Label className="text-lg font-bold">Referência Visual</Label>
+                <Label className="text-lg font-bold">Referência do Arquivo</Label>
                 <input 
                   type="file" 
                   ref={fileInputRef} 
@@ -372,7 +370,7 @@ export function ProjectCreationStepper() {
                     className="border-2 border-dashed border-white/10 rounded-2xl p-12 text-center hover:border-primary/50 hover:bg-white/5 cursor-pointer transition-all group"
                   >
                     <FileUp className="w-12 h-12 text-muted-foreground mx-auto mb-4 group-hover:text-primary" />
-                    <p className="font-medium">Carregar arquivo de referência</p>
+                    <p className="font-medium">Carregar referência para produção</p>
                   </div>
                 ) : (
                   <div className="relative bg-background rounded-2xl border border-white/10 p-4 flex items-center gap-4">
@@ -401,7 +399,7 @@ export function ProjectCreationStepper() {
                 className="bg-accent hover:bg-accent/90 text-white font-bold h-14 px-10 rounded-xl glowing-accent text-lg"
               >
                 {loading ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2 w-5 h-5" />}
-                Processar Visão
+                Processar Produção
               </Button>
             </div>
           </div>
@@ -413,7 +411,7 @@ export function ProjectCreationStepper() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-headline font-bold">Direção Criativa</h2>
-              <p className="text-muted-foreground">O plano de produção está pronto para ser executado.</p>
+              <p className="text-muted-foreground">O plano de produção está definido e pronto para execução.</p>
             </div>
             <Button variant="ghost" onClick={() => setStep("input")}><ArrowLeft className="mr-2" /> Voltar</Button>
           </div>
@@ -460,7 +458,7 @@ export function ProjectCreationStepper() {
                 className="w-full bg-accent hover:bg-accent/90 text-white h-14 text-lg font-bold rounded-xl"
                 onClick={() => setStep("config")}
               >
-                Continuar <ChevronRight className="ml-2" />
+                Configurar Produção <ChevronRight className="ml-2" />
               </Button>
             </div>
           </div>
@@ -470,8 +468,8 @@ export function ProjectCreationStepper() {
       {step === "config" && (
         <div className="space-y-12 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center">
-            <h2 className="text-4xl font-headline font-bold mb-4">Configurações Finais</h2>
-            <p className="text-muted-foreground">Defina o formato visual da sua produção.</p>
+            <h2 className="text-4xl font-headline font-bold mb-4">Configuração Visual</h2>
+            <p className="text-muted-foreground">Defina o formato e a quantidade de capturas.</p>
           </div>
 
           <div className="space-y-8">
@@ -493,7 +491,7 @@ export function ProjectCreationStepper() {
             </div>
 
             <div className="space-y-4">
-              <Label className="text-lg font-bold">Proporção (Aspect Ratio)</Label>
+              <Label className="text-lg font-bold">Proporção Visual</Label>
               <div className="grid grid-cols-5 gap-4">
                 {["1:1", "16:9", "9:16", "4:3", "3:4"].map((r) => (
                   <Button 
@@ -517,7 +515,7 @@ export function ProjectCreationStepper() {
               onClick={handleGenerateGrid}
             >
               {loading ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2 w-5 h-5" />}
-              Gerar Esboços Visuais
+              Capturar Esboços Visuais
             </Button>
           </div>
         </div>
@@ -528,7 +526,7 @@ export function ProjectCreationStepper() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-headline font-bold">Esboços Cinematográficos</h2>
-              <p className="text-muted-foreground">Cenas capturadas a partir da sua visão criativa.</p>
+              <p className="text-muted-foreground">Primeiras capturas da sua visão de produção.</p>
             </div>
             <Button variant="ghost" onClick={() => setStep("config")}><ArrowLeft className="mr-2" /> Voltar</Button>
           </div>
@@ -536,7 +534,7 @@ export function ProjectCreationStepper() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {gridImages.map((img, i) => (
               <div key={i} className="relative aspect-video rounded-xl overflow-hidden border border-white/10">
-                <Image src={img} alt={`Esboço ${i}`} fill className="object-cover" />
+                <Image src={img} alt={`Captura ${i}`} fill className="object-cover" />
                 <div className="absolute top-2 left-2">
                   <Badge className="bg-primary/80">Cena {i + 1}</Badge>
                 </div>
@@ -552,7 +550,7 @@ export function ProjectCreationStepper() {
               disabled={loading}
             >
               {loading ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2 w-5 h-5" />}
-              Refinar Detalhes
+              Refinar Detalhes de Cena
             </Button>
           </div>
         </div>
@@ -562,8 +560,8 @@ export function ProjectCreationStepper() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-headline font-bold text-accent">Consistência Visual</h2>
-              <p className="text-muted-foreground">Cenas refinadas com identidade visual preservada.</p>
+              <h2 className="text-3xl font-headline font-bold text-accent">Consistência de Produção</h2>
+              <p className="text-muted-foreground">Cenas refinadas com preservação de identidade visual.</p>
             </div>
             <Button variant="ghost" onClick={() => setStep("grid")}><ArrowLeft className="mr-2" /> Voltar</Button>
           </div>
@@ -575,8 +573,8 @@ export function ProjectCreationStepper() {
                   <Image src={img} alt={`Cena Refinada ${i}`} fill className="object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute bottom-4 left-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-accent">Cena {i+1}</p>
-                    <h3 className="font-bold text-lg">Visual Finalizado</h3>
+                    <p className="text-xs font-bold uppercase tracking-widest text-accent">Captura {i+1}</p>
+                    <h3 className="font-bold text-lg">Finalização Visual</h3>
                   </div>
                 </div>
               </div>
@@ -591,7 +589,7 @@ export function ProjectCreationStepper() {
               disabled={loading}
             >
               {loading ? <Loader2 className="mr-3 w-6 h-6 animate-spin" /> : <VideoIcon className="mr-3 w-6 h-6" />}
-              {loading ? "Processando Movimento..." : "Gerar Clipes de Vídeo"}
+              {loading ? "Processando Movimento..." : "Gerar Clipes Cinematográficos"}
             </Button>
           </div>
         </div>
@@ -601,7 +599,7 @@ export function ProjectCreationStepper() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-headline font-bold mb-4">Produção Concluída</h2>
-            <p className="text-muted-foreground">Seu conteúdo visual de alta definição está pronto.</p>
+            <p className="text-muted-foreground">Seu conteúdo de alta definição está pronto para distribuição.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-12 max-w-4xl mx-auto">
@@ -613,6 +611,10 @@ export function ProjectCreationStepper() {
                 </div>
               </div>
             ))}
+          </div>
+          
+          <div className="flex justify-center gap-4 mt-8">
+            <Button onClick={() => setStep("input")} variant="outline" size="lg">Novo Projeto</Button>
           </div>
         </div>
       )}

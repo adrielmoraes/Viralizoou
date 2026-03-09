@@ -46,33 +46,43 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
     const { scriptDetails, gridFormat, aspectRatio } = input;
     const numberOfScenes = getNumberOfScenes(gridFormat);
     const sceneDescriptionsToUse = (scriptDetails.sceneDescriptions || []).slice(0, numberOfScenes);
-    const characterDescription = scriptDetails.characterDescription || "A central character";
+    const characterDescription = scriptDetails.characterDescription || "A central subject";
 
     const referenceImageUrls: string[] = [];
 
-    // Processamento sequencial para garantir estabilidade, mas com tratamento de erro por item
+    // Processamento sequencial para garantir estabilidade visual
     for (let i = 0; i < sceneDescriptionsToUse.length; i++) {
-      const scenePrompt = `Professional cinematic production shot: "${sceneDescriptionsToUse[i]}". Subject: "${characterDescription}". Aspect ratio: ${aspectRatio}. Photorealistic, ultra-high definition, professional studio lighting.`;
+      // Prompt simplificado para evitar bloqueios de filtros de segurança sensíveis
+      const scenePrompt = `High-end cinematic production shot: ${sceneDescriptionsToUse[i]}. Focus: ${characterDescription}. Professional studio lighting, photorealistic style, high definition.`;
 
       try {
         const { media } = await ai.generate({
-          model: 'googleai/imagen-4.0-fast-generate-001',
+          model: 'googleai/imagen-3.0-generate-001',
           prompt: scenePrompt,
+          config: {
+            // Ajuste para permitir conteúdo criativo cinematográfico sem disparar falsos positivos
+            safetySettings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+            ]
+          }
         });
 
         if (media && media.url) {
           referenceImageUrls.push(media.url);
         } else {
-          console.warn(`Aviso: Cena ${i + 1} não retornou imagem.`);
+          console.warn(`Aviso: Falha na captura da cena ${i + 1}.`);
         }
       } catch (error: any) {
-        console.error(`Erro ao gerar cena ${i + 1}:`, error?.message || error);
-        // Continuamos tentando as próximas cenas mesmo se uma falhar
+        console.error(`Erro técnico na cena ${i + 1}:`, error?.message || error);
+        // Continua para as próximas cenas mesmo em caso de erro individual
       }
     }
 
     if (referenceImageUrls.length === 0) {
-      throw new Error("Não foi possível gerar nenhuma das cenas iniciais. Por favor, tente novamente com uma descrição diferente.");
+      throw new Error("Não foi possível gerar os esboços visuais. Por favor, tente ajustar sua descrição para algo mais focado no cenário e personagem.");
     }
 
     return { referenceImageUrls };

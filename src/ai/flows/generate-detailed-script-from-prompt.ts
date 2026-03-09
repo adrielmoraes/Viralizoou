@@ -47,27 +47,27 @@ const detailedScriptPrompt = ai.definePrompt({
   name: 'detailedScriptPrompt',
   input: { schema: GenerateDetailedScriptFromPromptInputSchema },
   output: { schema: GenerateDetailedScriptFromPromptOutputSchema },
-  prompt: `Você é um roteirista especializado em criar scripts cinematográficos curtos e impactantes. Seu objetivo é transformar uma ideia bruta em um roteiro detalhado para produção de vídeo. Cada cena deve ser ideal para um clipe de 8 segundos, focando na consistência visual de personagens e ambiente.
+  prompt: `Você é um roteirista especializado em criar planos de produção cinematográfica. Seu objetivo é transformar uma visão bruta em um roteiro detalhado para produção de vídeo consistente.
 
 Gere o seguinte:
-1. Sinopse: Resumo conciso.
-2. Roteiro: Detalhado com diálogos e ações.
-3. Descrições de Cena: Focadas em cenário, iluminação e ângulos de câmera (ex: Close Up, Low Angle).
-4. Descrições de Personagem: Detalhes físicos e vestimentas para garantir que o personagem seja o mesmo em todas as cenas.
+1. Sinopse: Resumo impactante.
+2. Roteiro: Detalhado com diálogos e ações cinematográficas.
+3. Descrições de Cena: Focadas em cenário, iluminação e ângulos de câmera profissionais.
+4. Identidade de Personagem: Detalhes visuais únicos para garantir consistência em todos os clipes.
 
 {{#if textInput}}
-Ideia Inicial:
-[INICIO DA IDEIA]
+Visão Inicial do Diretor:
+[INICIO]
 {{{textInput}}}
-[FIM DA IDEIA]
+[FIM]
 {{else if imageDataUri}}
-Ideia Inicial (Imagem): {{media url=imageDataUri}}
+Referência Visual Fornecida: {{media url=imageDataUri}}
 {{else if videoDataUri}}
-Ideia Inicial (Vídeo): {{media url=videoDataUri}}
+Referência em Movimento Fornecida: {{media url=videoDataUri}}
 {{else if audioDataUri}}
-Ideia Inicial (Áudio): {{media url=audioDataUri}}
+Visão em Áudio Fornecida: {{media url=audioDataUri}}
 {{else}}
-ERRO: Nenhuma ideia fornecida.
+ERRO: Nenhuma referência criativa foi fornecida.
 {{/if}}`,
 });
 
@@ -80,7 +80,7 @@ const generateDetailedScriptFromPromptFlow = ai.defineFlow(
   async (input) => {
     const { output } = await detailedScriptPrompt(input);
     if (!output) {
-      throw new Error('Falha ao gerar o roteiro detalhado.');
+      throw new Error('Falha ao processar o roteiro criativo.');
     }
     return output;
   }
