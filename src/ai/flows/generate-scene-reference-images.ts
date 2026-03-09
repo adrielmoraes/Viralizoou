@@ -1,6 +1,7 @@
+
 'use server';
 /**
- * @fileOverview Gera imagens de referência iniciais para as cenas baseadas no roteiro.
+ * @fileOverview Gera capturas visuais iniciais para as cenas baseadas no roteiro.
  */
 
 import {ai} from '@/ai/genkit';
@@ -43,46 +44,42 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
     outputSchema: GenerateSceneReferenceImagesOutputSchema,
   },
   async (input) => {
-    const { scriptDetails, gridFormat, aspectRatio } = input;
+    const { scriptDetails, gridFormat } = input;
     const numberOfScenes = getNumberOfScenes(gridFormat);
     const sceneDescriptionsToUse = (scriptDetails.sceneDescriptions || []).slice(0, numberOfScenes);
-    const characterDescription = scriptDetails.characterDescription || "A central subject";
+    const characterDescription = scriptDetails.characterDescription || "Protagonista central";
 
     const referenceImageUrls: string[] = [];
 
-    // Processamento sequencial para garantir estabilidade visual
     for (let i = 0; i < sceneDescriptionsToUse.length; i++) {
-      // Prompt simplificado para evitar bloqueios de filtros de segurança sensíveis
-      const scenePrompt = `High-end cinematic production shot: ${sceneDescriptionsToUse[i]}. Focus: ${characterDescription}. Professional studio lighting, photorealistic style, high definition.`;
+      const scenePrompt = `Produção cinematográfica de alto nível: ${sceneDescriptionsToUse[i]}. Foco principal: ${characterDescription}. Iluminação profissional de estúdio, estilo fotorrealista, alta definição, visual limpo e consistente.`;
 
       try {
         const { media } = await ai.generate({
-          model: 'googleai/imagen-3.0-generate-001',
+          model: 'googleai/gemini-2.0-flash',
           prompt: scenePrompt,
           config: {
-            // Ajuste para permitir conteúdo criativo cinematográfico sem disparar falsos positivos
+            responseModalities: ['IMAGE', 'TEXT'],
             safetySettings: [
-              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
-              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' },
             ]
           }
         });
 
         if (media && media.url) {
           referenceImageUrls.push(media.url);
-        } else {
-          console.warn(`Aviso: Falha na captura da cena ${i + 1}.`);
         }
       } catch (error: any) {
-        console.error(`Erro técnico na cena ${i + 1}:`, error?.message || error);
-        // Continua para as próximas cenas mesmo em caso de erro individual
+        console.error(`Falha técnica na cena ${i + 1}:`, error?.message || error);
       }
     }
 
     if (referenceImageUrls.length === 0) {
-      throw new Error("Não foi possível gerar os esboços visuais. Por favor, tente ajustar sua descrição para algo mais focado no cenário e personagem.");
+      throw new Error("Não foi possível gerar as capturas visuais. Por favor, revise sua descrição e tente novamente.");
     }
 
     return { referenceImageUrls };

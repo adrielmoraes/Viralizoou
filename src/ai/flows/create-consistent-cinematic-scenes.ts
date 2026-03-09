@@ -1,6 +1,7 @@
+
 'use server';
 /**
- * @fileOverview Recria e aprimora cenas cinematográficas com consistência visual.
+ * @fileOverview Finalização e aprimoramento de capturas com consistência visual profissional.
  */
 
 import { ai } from '@/ai/genkit';
@@ -38,28 +39,31 @@ const createConsistentCinematicScenesFlow = ai.defineFlow(
   async (input) => {
     try {
       const { media } = await ai.generate({
-        model: 'googleai/gemini-2.5-flash-image',
+        model: 'googleai/gemini-2.0-flash',
         prompt: [
-          { text: `Enhance this cinematic scene keeping visual identity consistent: ${input.characterProfileDescription}. Scene details: ${input.sceneDescription}. Style: Ultra-realistic, 4k.` },
+          { text: `Finalização cinematográfica ultra-realista. Mantenha a identidade visual idêntica: ${input.characterProfileDescription}. Detalhes da cena: ${input.sceneDescription}. Estilo: 4K, fotorrealismo extremo, iluminação HDR.` },
           { media: { url: input.referenceImageUri } },
         ],
         config: {
-          responseModalities: ['TEXT', 'IMAGE'],
+          responseModalities: ['IMAGE', 'TEXT'],
           safetySettings: [
             { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
             { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' },
           ]
         }
       });
 
       if (!media) {
-        throw new Error('Falha no refinamento visual.');
+        throw new Error('Falha na finalização visual.');
       }
 
       return { enhancedImageUri: media.url };
     } catch (error) {
-      console.error('Erro no refinamento:', error);
-      throw new Error('Erro ao processar refinamento visual.');
+      console.error('Erro na finalização:', error);
+      throw new Error('Erro ao processar a finalização visual das capturas.');
     }
   }
 );

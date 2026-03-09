@@ -1,6 +1,7 @@
+
 'use server';
 /**
- * @fileOverview Gera clipes de vídeo cinematográficos com consistência visual.
+ * @fileOverview Geração de clipes cinematográficos com fluidez e consistência.
  */
 
 import {ai} from '@/ai/genkit';
@@ -8,8 +9,8 @@ import {z} from 'genkit';
 import {googleAI} from '@genkit-ai/google-genai';
 
 const SceneInputSchema = z.object({
-  sceneTextDescription: z.string().describe('Descrição textual da cena para geração de vídeo.'),
-  imageReferenceDataUri: z.string().describe("Imagem de referência (data URI Base64)."),
+  sceneTextDescription: z.string().describe('Descrição textual da cena para geração de movimento.'),
+  imageReferenceDataUri: z.string().describe("Imagem de referência final (data URI Base64)."),
 });
 
 const GenerateConsistentVideoClipsInputSchema = z.object({
@@ -20,7 +21,7 @@ const GenerateConsistentVideoClipsInputSchema = z.object({
 export type GenerateConsistentVideoClipsInput = z.infer<typeof GenerateConsistentVideoClipsInputSchema>;
 
 const GenerateConsistentVideoClipsOutputSchema = z.array(
-  z.string().describe('Data URI do vídeo gerado.')
+  z.string().describe('Data URI do clipe gerado.')
 );
 
 export type GenerateConsistentVideoClipsOutput = z.infer<typeof GenerateConsistentVideoClipsOutputSchema>;
@@ -44,26 +45,25 @@ const generateConsistentVideoClipsFlow = ai.defineFlow(
         const generateResponse = await ai.generate({
           model: googleAI.model('veo-3.0-generate-preview'),
           prompt: [
-            { text: `Generate a high-quality cinematic video for this scene: ${scene.sceneTextDescription}. Keep the motion natural and maintain consistency with the provided reference image.` },
+            { text: `Gere movimento natural e cinematográfico para esta cena: ${scene.sceneTextDescription}. Mantenha fidelidade total à imagem de referência fornecida.` },
             { media: { url: scene.imageReferenceDataUri } },
           ],
         });
         operation = generateResponse.operation;
       } catch (error: any) {
-        console.error('Erro ao iniciar geração de vídeo:', error?.message || error);
+        console.error('Erro ao iniciar processamento de movimento:', error?.message || error);
         continue;
       }
 
       if (!operation) continue;
 
-      // Aguardar conclusão da operação
       while (!operation.done) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
         operation = await ai.checkOperation(operation);
       }
 
       if (operation.error) {
-        console.error(`Erro no motor de vídeo: ${operation.error.message}`);
+        console.error(`Falha no motor de movimento: ${operation.error.message}`);
         continue;
       }
 
@@ -74,10 +74,7 @@ const generateConsistentVideoClipsFlow = ai.defineFlow(
       try {
         const videoDownloadResponse = await fetch(`${videoMediaPart.media.url}&key=${process.env.GEMINI_API_KEY}`);
 
-        if (!videoDownloadResponse.ok) {
-          console.error('Falha ao baixar vídeo gerado.');
-          continue;
-        }
+        if (!videoDownloadResponse.ok) continue;
 
         const videoArrayBuffer = await videoDownloadResponse.arrayBuffer();
         const videoBuffer = Buffer.from(videoArrayBuffer);
@@ -86,12 +83,12 @@ const generateConsistentVideoClipsFlow = ai.defineFlow(
 
         videoDataUris.push(`data:${contentType};base64,${base64Video}`);
       } catch (e) {
-        console.error('Erro ao processar buffer de vídeo:', e);
+        console.error('Erro ao processar mídia final:', e);
       }
     }
 
     if (videoDataUris.length === 0) {
-      throw new Error('Não foi possível gerar os movimentos visuais solicitados.');
+      throw new Error('Não foi possível gerar os movimentos cinematográficos solicitados.');
     }
 
     return videoDataUris;
