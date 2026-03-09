@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,8 @@ import {
   ChevronRight,
   Layers,
   X,
-  FileUp
+  FileUp,
+  Square
 } from "lucide-react";
 import { generateDetailedScriptFromPrompt } from "@/ai/flows/generate-detailed-script-from-prompt";
 import { generateSceneReferenceImages } from "@/ai/flows/generate-scene-reference-images";
@@ -41,6 +42,11 @@ export function ProjectCreationStepper() {
   const [inputType, setInputType] = useState<InputType>("text");
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Audio recording state
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
 
   const [inputData, setInputData] = useState({ 
     text: "", 
@@ -58,6 +64,18 @@ export function ProjectCreationStepper() {
   const [refinedImages, setRefinedImages] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
 
+  useEffect(() => {
+    let interval: any;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setRecordingTime(0);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -73,13 +91,58 @@ export function ProjectCreationStepper() {
     reader.readAsDataURL(file);
   };
 
-  const handleImproveIdea = async () => {
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      const chunks: Blob[] = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+      
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setInputData({
+            ...inputData,
+            media: reader.result as string,
+            fileName: `gravacao-${new Date().getTime()}.webm`
+          });
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      toast({ title: "Erro ao acessar o microfone", variant: "destructive" });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleProcessIdea = async () => {
     if (inputType === "text" && !inputData.text) {
       toast({ title: "Por favor, descreva sua ideia primeiro.", variant: "destructive" });
       return;
     }
     if (inputType !== "text" && !inputData.media) {
-      toast({ title: `Por favor, selecione um arquivo de ${inputType} primeiro.`, variant: "destructive" });
+      toast({ title: `Por favor, forneça um arquivo ou gravação de ${inputType} primeiro.`, variant: "destructive" });
       return;
     }
 
@@ -166,7 +229,7 @@ export function ProjectCreationStepper() {
   };
 
   const renderProgress = () => {
-    const steps = ["Início", "Roteiro", "Configuração", "Grade", "Refinamento", "Vídeo", "Final"];
+    const steps = ["Início", "Roteiro", "Produção", "Cenas", "Aprimoramento", "Filme", "Pronto"];
     const stepKeys: Step[] = ["input", "script", "config", "grid", "refinement", "video", "finish"];
     const currentIdx = stepKeys.indexOf(step);
     return (
@@ -189,10 +252,10 @@ export function ProjectCreationStepper() {
   };
 
   const inputTypes = [
-    { id: "text" as InputType, icon: Type, label: "Texto", desc: "Comece do zero" },
+    { id: "text" as InputType, icon: Type, label: "Texto", desc: "Descreva sua ideia" },
     { id: "image" as InputType, icon: ImageIcon, label: "Imagem", desc: "Referência visual" },
-    { id: "video" as InputType, icon: VideoIcon, label: "Vídeo", desc: "Transferência de estilo" },
-    { id: "audio" as InputType, icon: Mic, label: "Áudio", desc: "Transcrição" }
+    { id: "video" as InputType, icon: VideoIcon, label: "Vídeo", desc: "Inspiração de cena" },
+    { id: "audio" as InputType, icon: Mic, label: "Áudio", desc: "Grave sua voz" }
   ];
 
   return (
@@ -239,14 +302,85 @@ export function ProjectCreationStepper() {
                   onChange={(e) => setInputData({ ...inputData, text: e.target.value })}
                 />
               </div>
+            ) : inputType === "audio" ? (
+              <div className="space-y-6 text-center py-8">
+                <Label className="text-lg font-bold block mb-4">Grave sua ideia ou faça Upload</Label>
+                
+                <div className="flex flex-col items-center gap-6">
+                  {!inputData.media ? (
+                    <div className="flex flex-col items-center gap-4">
+                      <Button 
+                        size="lg"
+                        className={`w-24 h-24 rounded-full glowing-accent ${isRecording ? "bg-destructive hover:bg-destructive/90 animate-pulse" : "bg-primary hover:bg-primary/90"}`}
+                        onClick={isRecording ? stopRecording : startRecording}
+                      >
+                        {isRecording ? <Square className="w-8 h-8 fill-current" /> : <Mic className="w-10 h-10" />}
+                      </Button>
+                      
+                      {isRecording && (
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+                          <span className="font-mono text-xl">{formatTime(recordingTime)}</span>
+                        </div>
+                      )}
+                      
+                      <p className="text-sm text-muted-foreground font-medium uppercase tracking-widest">
+                        {isRecording ? "Clique para Parar" : "Clique para Gravar"}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative bg-background rounded-2xl border border-white/10 p-6 flex items-center gap-6 w-full max-w-md mx-auto">
+                      <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <Mic />
+                      </div>
+                      <div className="flex-1 text-left overflow-hidden">
+                        <p className="font-bold truncate">{inputData.fileName}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Áudio Capturado</p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="rounded-full hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => setInputData({ ...inputData, media: null, fileName: "" })}
+                      >
+                        <X className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  )}
+
+                  {!isRecording && !inputData.media && (
+                    <div className="pt-4 w-full max-w-sm">
+                      <div className="relative flex items-center gap-4 mb-4">
+                        <div className="flex-1 border-t border-white/5"></div>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-widest">ou use um arquivo</span>
+                        <div className="flex-1 border-t border-white/5"></div>
+                      </div>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="audio/*"
+                        onChange={handleFileChange}
+                      />
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-white/10 h-12 rounded-xl"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <FileUp className="mr-2 w-4 h-4" /> Selecionar Áudio
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             ) : (
               <div className="space-y-4">
-                <Label className="text-lg font-bold">Upload de Referência ({inputType})</Label>
+                <Label className="text-lg font-bold">Referência de {inputType === "image" ? "Imagem" : "Vídeo"}</Label>
                 <input 
                   type="file" 
                   ref={fileInputRef} 
                   className="hidden" 
-                  accept={inputType === "image" ? "image/*" : inputType === "video" ? "video/*" : "audio/*"}
+                  accept={inputType === "image" ? "image/*" : "video/*"}
                   onChange={handleFileChange}
                 />
                 {!inputData.media ? (
@@ -258,12 +392,12 @@ export function ProjectCreationStepper() {
                       <FileUp className="w-8 h-8 text-muted-foreground group-hover:text-primary" />
                     </div>
                     <p className="font-medium">Clique para selecionar ou arraste o arquivo</p>
-                    <p className="text-xs text-muted-foreground mt-2">Formatos aceitos de {inputType}</p>
+                    <p className="text-xs text-muted-foreground mt-2">Formatos de alta definição aceitos</p>
                   </div>
                 ) : (
                   <div className="relative bg-background rounded-2xl border border-white/10 p-4 flex items-center gap-4">
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
-                      {inputType === "image" ? <ImageIcon /> : inputType === "video" ? <VideoIcon /> : <Mic />}
+                      {inputType === "image" ? <ImageIcon /> : <VideoIcon />}
                     </div>
                     <div className="flex-1 overflow-hidden">
                       <p className="font-medium truncate">{inputData.fileName}</p>
@@ -282,14 +416,14 @@ export function ProjectCreationStepper() {
               </div>
             )}
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-4">
               <Button 
-                onClick={handleImproveIdea} 
-                disabled={loading}
+                onClick={handleProcessIdea} 
+                disabled={loading || isRecording}
                 className="bg-accent hover:bg-accent/90 text-white font-bold h-14 px-10 rounded-xl glowing-accent text-lg"
               >
                 {loading ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2 w-5 h-5" />}
-                Processar Ideia
+                Criar Roteiro
               </Button>
             </div>
           </div>
@@ -333,7 +467,7 @@ export function ProjectCreationStepper() {
             <div className="space-y-6">
               <div className="bg-primary/5 p-6 rounded-2xl border border-primary/20">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-primary">
-                  <Settings2 /> Identidade Visual
+                  <Settings2 /> Consistência Visual
                 </h3>
                 <div className="space-y-4">
                   {scriptData.characterDescriptions.map((char: string, i: number) => (
@@ -345,7 +479,7 @@ export function ProjectCreationStepper() {
                 </div>
               </div>
               <Button 
-                className="w-full bg-accent hover:bg-accent/90 text-white h-14 text-lg font-bold"
+                className="w-full bg-accent hover:bg-accent/90 text-white h-14 text-lg font-bold rounded-xl"
                 onClick={() => setStep("config")}
               >
                 Configurar Produção <ChevronRight className="ml-2" />
@@ -364,7 +498,7 @@ export function ProjectCreationStepper() {
 
           <div className="space-y-8">
             <div className="space-y-4">
-              <Label className="text-lg font-bold">Layout de Cenas (Número de Clipes)</Label>
+              <Label className="text-lg font-bold">Número de Clipes</Label>
               <div className="grid grid-cols-4 gap-4">
                 {["2x2", "2x3", "2x4", "2x5"].map((g) => (
                   <Button 
@@ -384,7 +518,7 @@ export function ProjectCreationStepper() {
             </div>
 
             <div className="space-y-4">
-              <Label className="text-lg font-bold">Proporção (Aspect Ratio)</Label>
+              <Label className="text-lg font-bold">Proporção</Label>
               <div className="grid grid-cols-5 gap-4">
                 {["1:1", "16:9", "9:16", "4:3", "3:4"].map((r) => (
                   <Button 
@@ -418,9 +552,9 @@ export function ProjectCreationStepper() {
           </div>
 
           <div className="flex gap-4">
-            <Button variant="ghost" onClick={() => setStep("script")} className="h-14 flex-1">Voltar ao Roteiro</Button>
+            <Button variant="ghost" onClick={() => setStep("script")} className="h-14 flex-1">Voltar</Button>
             <Button 
-              className="bg-primary hover:bg-primary/90 text-white h-14 flex-1 text-lg font-bold glowing-accent"
+              className="bg-primary hover:bg-primary/90 text-white h-14 flex-1 text-lg font-bold glowing-accent rounded-xl"
               disabled={loading}
               onClick={handleGenerateGrid}
             >
@@ -460,7 +594,7 @@ export function ProjectCreationStepper() {
               disabled={loading}
             >
               {loading ? <Loader2 className="mr-2 animate-spin" /> : <Sparkles className="mr-2 w-5 h-5" />}
-              Aplicar Refinamento Visual
+              Refinar Cenas
             </Button>
           </div>
         </div>
@@ -471,7 +605,7 @@ export function ProjectCreationStepper() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-headline font-bold text-accent">Consistência e Definição</h2>
-              <p className="text-muted-foreground">Cenas recriadas com consistência cinematográfica.</p>
+              <p className="text-muted-foreground">Cenas recriadas com precisão profissional.</p>
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" onClick={() => setStep("grid")}><ArrowLeft className="mr-2" /> Voltar</Button>
@@ -486,7 +620,7 @@ export function ProjectCreationStepper() {
                   <Image src={img} alt={`Cena Refinada ${i}`} fill className="object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute bottom-4 left-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-accent">SHOT {i+1}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-accent">Cena {i+1}</p>
                     <h3 className="font-bold text-lg">Qualidade Finalizada</h3>
                   </div>
                 </div>
@@ -551,7 +685,7 @@ export function ProjectCreationStepper() {
             <div className="flex gap-4">
               <Button size="lg" variant="outline" className="h-14 px-12 rounded-xl">Reorganizar Sequência</Button>
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-white h-14 px-12 rounded-xl glowing-accent font-bold text-lg">
-                Montar Vídeo (MP4)
+                Montar Filme Final
               </Button>
             </div>
           </div>
