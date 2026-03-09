@@ -1,9 +1,10 @@
+
 import Link from "next/link";
 import { Video, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProjectCreationStepper } from "@/components/project-creation-stepper";
 
-export const maxDuration = 120; // Aumentado para suportar gerações múltiplas de imagens e vídeos
+export const maxDuration = 180; // Aumentado significativamente para suportar gerações múltiplas de 10 cenas
 
 export default function NewProjectPage() {
   return (

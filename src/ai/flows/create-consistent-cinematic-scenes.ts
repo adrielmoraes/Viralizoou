@@ -39,9 +39,9 @@ const createConsistentCinematicScenesFlow = ai.defineFlow(
   async (input) => {
     try {
       const { media } = await ai.generate({
-        model: 'googleai/gemini-2.0-flash',
+        model: 'googleai/gemini-3.1-flash-image-preview',
         prompt: [
-          { text: `Finalização cinematográfica ultra-realista. Mantenha a identidade visual idêntica: ${input.characterProfileDescription}. Detalhes da cena: ${input.sceneDescription}. Estilo: 4K, fotorrealismo extremo, iluminação HDR.` },
+          { text: `Finalização visual ultra-realista. Preserve a identidade visual idêntica: ${input.characterProfileDescription}. Detalhes da cena: ${input.sceneDescription}. Estilo: 4K, iluminação profissional cinematográfica, texturas detalhadas.` },
           { media: { url: input.referenceImageUri } },
         ],
         config: {
@@ -57,13 +57,12 @@ const createConsistentCinematicScenesFlow = ai.defineFlow(
       });
 
       if (!media) {
-        throw new Error('Falha na finalização visual.');
+        throw new Error('Falha no aprimoramento visual.');
       }
 
       return { enhancedImageUri: media.url };
     } catch (error) {
-      console.error('Erro na finalização:', error);
-      throw new Error('Erro ao processar a finalização visual das capturas.');
+      throw new Error('Erro ao processar o aprimoramento visual das cenas.');
     }
   }
 );

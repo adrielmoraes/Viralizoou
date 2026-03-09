@@ -52,11 +52,11 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
     const referenceImageUrls: string[] = [];
 
     for (let i = 0; i < sceneDescriptionsToUse.length; i++) {
-      const scenePrompt = `Produção cinematográfica de alto nível: ${sceneDescriptionsToUse[i]}. Foco principal: ${characterDescription}. Iluminação profissional de estúdio, estilo fotorrealista, alta definição, visual limpo e consistente.`;
+      const scenePrompt = `Produção cinematográfica profissional de alta fidelidade: ${sceneDescriptionsToUse[i]}. Foco principal: ${characterDescription}. Estilo visual consistente, iluminação HDR, fotorrealismo extremo, composição limpa.`;
 
       try {
         const { media } = await ai.generate({
-          model: 'googleai/gemini-2.0-flash',
+          model: 'googleai/gemini-3.1-flash-image-preview',
           prompt: scenePrompt,
           config: {
             responseModalities: ['IMAGE', 'TEXT'],
@@ -74,12 +74,12 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
           referenceImageUrls.push(media.url);
         }
       } catch (error: any) {
-        console.error(`Falha técnica na cena ${i + 1}:`, error?.message || error);
+        // Silently continue to next scene if one fails, to return what was possible
       }
     }
 
     if (referenceImageUrls.length === 0) {
-      throw new Error("Não foi possível gerar as capturas visuais. Por favor, revise sua descrição e tente novamente.");
+      throw new Error("Não foi possível gerar as capturas visuais. Por favor, revise sua descrição ou tente um número menor de cenas.");
     }
 
     return { referenceImageUrls };

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Gera um roteiro cinematográfico detalhado a partir de uma ideia inicial.
@@ -47,23 +48,21 @@ const detailedScriptPrompt = ai.definePrompt({
   name: 'detailedScriptPrompt',
   input: { schema: GenerateDetailedScriptFromPromptInputSchema },
   output: { schema: GenerateDetailedScriptFromPromptOutputSchema },
-  prompt: `Você é um roteirista especializado em criar planos de produção cinematográfica. Seu objetivo é transformar uma visão bruta em um roteiro detalhado para produção de vídeo consistente.
+  prompt: `Você é um diretor e roteirista especializado em produções cinematográficas de alto nível.
 
 Gere o seguinte:
-1. Sinopse: Resumo impactante.
-2. Roteiro: Detalhado com diálogos e ações cinematográficas.
-3. Descrições de Cena: Focadas em cenário, iluminação e ângulos de câmera profissionais.
-4. Identidade de Personagem: Detalhes visuais únicos para garantir consistência em todos os clipes.
+1. Sinopse: Resumo impactante da história.
+2. Roteiro: Detalhado com ações e diálogos.
+3. Descrições de Cena: Focadas em cenário, iluminação e ângulos de câmera.
+4. Perfil Visual: Detalhes únicos para garantir a consistência de personagens e ambientes.
 
 {{#if textInput}}
-Visão Inicial do Diretor:
-[INICIO]
+Ideia Inicial:
 {{{textInput}}}
-[FIM]
 {{else if imageDataUri}}
 Referência Visual Fornecida: {{media url=imageDataUri}}
 {{else if videoDataUri}}
-Referência em Movimento Fornecida: {{media url=videoDataUri}}
+Referência de Movimento Fornecida: {{media url=videoDataUri}}
 {{else if audioDataUri}}
 Visão em Áudio Fornecida: {{media url=audioDataUri}}
 {{else}}
@@ -80,7 +79,7 @@ const generateDetailedScriptFromPromptFlow = ai.defineFlow(
   async (input) => {
     const { output } = await detailedScriptPrompt(input);
     if (!output) {
-      throw new Error('Falha ao processar o roteiro criativo.');
+      throw new Error('Falha ao processar a visão criativa.');
     }
     return output;
   }
