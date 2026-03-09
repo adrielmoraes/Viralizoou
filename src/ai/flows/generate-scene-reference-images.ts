@@ -5,7 +5,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
 
 const GenerateSceneReferenceImagesInputSchema = z.object({
   scriptDetails: z.object({
@@ -19,7 +18,7 @@ const GenerateSceneReferenceImagesInputSchema = z.object({
 export type GenerateSceneReferenceImagesInput = z.infer<typeof GenerateSceneReferenceImagesInputSchema>;
 
 const GenerateSceneReferenceImagesOutputSchema = z.object({
-  referenceImageUrls: z.array(z.string().url()).describe('URLs das imagens geradas.'),
+  referenceImageUrls: z.array(z.string()).describe('Data URIs das imagens geradas.'),
 });
 export type GenerateSceneReferenceImagesOutput = z.infer<typeof GenerateSceneReferenceImagesOutputSchema>;
 
@@ -52,10 +51,11 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
     const referenceImageUrls: string[] = [];
 
     for (let i = 0; i < sceneDescriptionsToUse.length; i++) {
-      const scenePrompt = `Gere uma imagem cinematográfica de alta qualidade para a cena: "${sceneDescriptionsToUse[i]}". Mantenha o personagem principal: "${characterDescription}". Proporção: ${aspectRatio}. Resolução: ${resolution}.`;
+      const scenePrompt = `Cinematic high-quality scene for: "${sceneDescriptionsToUse[i]}". Main character: "${characterDescription}". Aspect ratio: ${aspectRatio}. Professional lighting.`;
 
+      // Usando Imagen 4 para geração de imagem de alta qualidade
       const { media } = await ai.generate({
-        model: 'googleai/gemini-2.0-flash-exp',
+        model: 'googleai/imagen-4.0-fast-generate-001',
         prompt: scenePrompt,
       });
 

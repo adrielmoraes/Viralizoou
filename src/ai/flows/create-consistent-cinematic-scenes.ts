@@ -39,7 +39,7 @@ Instruções:
 1. Recrie a imagem de referência usando a descrição da cena e o perfil do personagem.
 2. Garanta qualidade cinematográfica em iluminação e composição.
 3. Mantenha o personagem idêntico: mesmo rosto, corpo e roupas em todas as cenas.
-4. Aplique a proporção {{{aspectRatio}}} e resolução {{{resolution}}}.
+4. Aplique a proporção {{{aspectRatio}}}.
 
 Perfil do Personagem: {{{characterProfileDescription}}}
 Descrição da Cena: {{{sceneDescription}}}
@@ -55,15 +55,16 @@ const createConsistentCinematicScenesFlow = ai.defineFlow(
     outputSchema: CreateConsistentCinematicScenesOutputSchema,
   },
   async (input) => {
+    // Usando modelo especializado em edição e consistência de imagem
     const { media } = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: 'googleai/gemini-2.5-flash-image',
       prompt: [
         { text: enhanceSceneImagePrompt.prompt! },
         { media: { url: input.referenceImageUri } },
       ],
       config: {
-        negativePrompt: input.negativePrompt || undefined,
-      },
+        responseModalities: ['TEXT', 'IMAGE'],
+      }
     });
 
     if (!media) {

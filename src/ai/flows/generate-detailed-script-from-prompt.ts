@@ -57,9 +57,9 @@ Gere o seguinte:
 
 {{#if textInput}}
 Ideia Inicial:
-[INICIO]
+[INICIO DA IDEIA]
 {{{textInput}}}
-[FIM]
+[FIM DA IDEIA]
 {{else if imageDataUri}}
 Ideia Inicial (Imagem): {{media url=imageDataUri}}
 {{else if videoDataUri}}
