@@ -33,10 +33,6 @@ export default function LandingPage() {
 
       <main className="flex-1">
         <section className="px-6 pt-20 pb-32 text-center max-w-5xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary-foreground text-xs font-bold mb-8 animate-pulse">
-            <Sparkles className="w-3 h-3" />
-            <span>POWERED BY GEMINI & VEO 3.1</span>
-          </div>
           <h1 className="text-5xl md:text-7xl font-headline font-bold leading-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
             Create Cinematic Consistency <br />With AI Precision
           </h1>
@@ -84,7 +80,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Total Consistency</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Our Character Profile DNA ensures the same face, body, and clothing across all 8-second clips. No more flickering characters.
+                  Our Character Profile DNA ensures the same face, body, and clothing across all clips. No more flickering characters.
                 </p>
               </div>
               
@@ -94,7 +90,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">Cinematic Refinement</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Utilize Gemini 3.1 Flash Image Preview to refine every scene with professional lighting, camera angles, and textures.
+                  Utilize advanced AI engines to refine every scene with professional lighting, camera angles, and high-fidelity textures.
                 </p>
               </div>
               
@@ -102,9 +98,9 @@ export default function LandingPage() {
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-white transition-colors">
                   <Video className="text-white group-hover:text-background" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">Veo 3.1 Generation</h3>
+                <h3 className="text-xl font-bold mb-3">Motion Generation</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Generate stunning 8-second clips with the latest Veo 3.1 model. Perfect movement, physics, and realism.
+                  Generate stunning high-definition clips with the latest video models. Perfect movement, physics, and realism.
                 </p>
               </div>
             </div>

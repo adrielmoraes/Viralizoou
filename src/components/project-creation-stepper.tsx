@@ -22,7 +22,8 @@ import {
   Maximize2,
   CheckCircle2,
   Loader2,
-  ChevronRight
+  ChevronRight,
+  Layers
 } from "lucide-react";
 import { generateDetailedScriptFromPrompt } from "@/ai/flows/generate-detailed-script-from-prompt";
 import { generateSceneReferenceImages } from "@/ai/flows/generate-scene-reference-images";
@@ -206,7 +207,7 @@ export function ProjectCreationStepper() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-headline font-bold">AI Refined Script</h2>
-              <p className="text-muted-foreground">Gemini has expanded your idea into a production-ready script.</p>
+              <p className="text-muted-foreground">The AI has expanded your idea into a production-ready script.</p>
             </div>
             <Button variant="ghost" onClick={() => setStep("input")}><ArrowLeft className="mr-2" /> Back</Button>
           </div>
@@ -341,7 +342,7 @@ export function ProjectCreationStepper() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-headline font-bold">Visual Grid References</h2>
-              <p className="text-muted-foreground">Gemini 3.1 Flash Image Preview has drafted initial scenes.</p>
+              <p className="text-muted-foreground">The AI engine has drafted initial reference scenes.</p>
             </div>
             <Button variant="ghost" onClick={() => setStep("config")}><ArrowLeft className="mr-2" /> Back</Button>
           </div>
@@ -412,12 +413,12 @@ export function ProjectCreationStepper() {
               {loading ? (
                 <>
                   <Loader2 className="mr-3 w-6 h-6 animate-spin" />
-                  Generating Clips with Veo 3.1...
+                  Generating Cinematic Clips...
                 </>
               ) : (
                 <>
                   <VideoIcon className="mr-3 w-6 h-6" />
-                  Generate 8s Video Clips
+                  Generate Video Clips
                 </>
               )}
             </Button>
@@ -429,7 +430,7 @@ export function ProjectCreationStepper() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-headline font-bold mb-4">Final Production</h2>
-            <p className="text-muted-foreground">8-second clips generated with Veo 3.1. Continuity sequences applied.</p>
+            <p className="text-muted-foreground">Clips generated with cinematic precision. Continuity sequences applied.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-12 max-w-4xl mx-auto">

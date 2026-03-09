@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: 'Viralizoou | Cinematic AI Video Creator',
-  description: 'Create viral cinematographic short videos with AI consistency using Gemini and Veo 3.1.',
+  description: 'Create viral cinematographic short videos with professional AI consistency.',
 };
 
 export default function RootLayout({
