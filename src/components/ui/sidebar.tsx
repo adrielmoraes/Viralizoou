@@ -650,9 +650,11 @@ const SidebarMenuSkeleton = React.forwardRef<
     showIcon?: boolean
   }
 >(({ className, showIcon = false, ...props }, ref) => {
-  // Random width between 50 to 90%.
-  const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`
+  // Use state and useEffect to avoid hydration mismatch for the random width
+  const [skeletonWidth, setSkeletonWidth] = React.useState<string>("70%")
+
+  React.useEffect(() => {
+    setSkeletonWidth(`${Math.floor(Math.random() * 40) + 50}%`)
   }, [])
 
   return (
@@ -673,7 +675,7 @@ const SidebarMenuSkeleton = React.forwardRef<
         data-sidebar="menu-skeleton-text"
         style={
           {
-            "--skeleton-width": width,
+            "--skeleton-width": skeletonWidth,
           } as React.CSSProperties
         }
       />
