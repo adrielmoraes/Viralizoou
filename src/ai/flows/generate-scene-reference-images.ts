@@ -46,28 +46,40 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
     const { scriptDetails, gridFormat, aspectRatio } = input;
     const numberOfScenes = getNumberOfScenes(gridFormat);
     const sceneDescriptionsToUse = (scriptDetails.sceneDescriptions || []).slice(0, numberOfScenes);
-    const characterDescription = scriptDetails.characterDescription || "Um personagem central";
+    const characterDescription = scriptDetails.characterDescription || "A central character";
 
     const referenceImageUrls: string[] = [];
 
     for (let i = 0; i < sceneDescriptionsToUse.length; i++) {
-      const scenePrompt = `Cinematic high-quality scene for: "${sceneDescriptionsToUse[i]}". Main character: "${characterDescription}". Aspect ratio: ${aspectRatio}. Professional lighting, 8k resolution, photorealistic style.`;
+      const scenePrompt = `Professional cinematic production shot: "${sceneDescriptionsToUse[i]}". Subject: "${characterDescription}". Aspect ratio: ${aspectRatio}. Photorealistic, ultra-high definition, professional studio lighting.`;
 
-      // Usando Imagen 3 para maior estabilidade na geração inicial
-      const { media } = await ai.generate({
-        model: 'googleai/imagen-3.0-generate-001',
-        prompt: scenePrompt,
-      });
+      try {
+        const { media } = await ai.generate({
+          model: 'googleai/imagen-4.0-fast-generate-001',
+          prompt: scenePrompt,
+          config: {
+            safetySettings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            ]
+          }
+        });
 
-      if (media && media.url) {
-        referenceImageUrls.push(media.url);
-      } else {
-        throw new Error(`Falha ao gerar imagem para a cena ${i+1}.`);
+        if (media && media.url) {
+          referenceImageUrls.push(media.url);
+        } else {
+          throw new Error(`Sem resultado visual para a cena ${i + 1}`);
+        }
+      } catch (error) {
+        console.error(`Erro na cena ${i + 1}:`, error);
+        throw new Error(`Falha ao processar a cena ${i + 1}.`);
       }
     }
 
     if (referenceImageUrls.length === 0) {
-      throw new Error("Nenhuma imagem pôde ser gerada.");
+      throw new Error("Não foi possível gerar as cenas iniciais.");
     }
 
     return { referenceImageUrls };
