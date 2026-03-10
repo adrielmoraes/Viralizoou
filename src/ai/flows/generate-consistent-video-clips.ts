@@ -2,11 +2,12 @@
 'use server';
 /**
  * @fileOverview Geração de clipes cinematográficos com fluidez e consistência.
+ * Usa veo-3.1-generate-preview conforme PRD.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const SceneInputSchema = z.object({
   sceneTextDescription: z.string().describe('Descrição textual da cena para geração de movimento.'),
@@ -43,9 +44,9 @@ const generateConsistentVideoClipsFlow = ai.defineFlow(
       let operation;
       try {
         const generateResponse = await ai.generate({
-          model: googleAI.model('veo-3.0-generate-preview'),
+          model: googleAI.model('veo-3.1-generate-preview'),
           prompt: [
-            { text: `Gere movimento natural e cinematográfico para esta cena: ${scene.sceneTextDescription}. Mantenha fidelidade total à imagem de referência fornecida.` },
+            { text: `Gere movimento natural e cinematográfico para esta cena: ${scene.sceneTextDescription}. Mantenha fidelidade total à imagem de referência fornecida. Crie 8 segundos de vídeo com movimentos suaves e cinematográficos.` },
             { media: { url: scene.imageReferenceDataUri } },
           ],
         });

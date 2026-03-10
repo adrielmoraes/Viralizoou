@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Play, Sparkles, Video, Layers, ShieldCheck, ArrowRight } from "lucide-react";
+import { Play, Sparkles, Video, Layers, ShieldCheck, ArrowRight, Crown } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function LandingPage() {
@@ -17,16 +17,16 @@ export default function LandingPage() {
           <span className="text-2xl font-headline font-bold tracking-tight">Viralizoou</span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
-          <Link href="#how-it-works" className="hover:text-foreground transition-colors">How it Works</Link>
-          <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+          <Link href="#features" className="hover:text-foreground transition-colors">Recursos</Link>
+          <Link href="#how-it-works" className="hover:text-foreground transition-colors">Como Funciona</Link>
+          <Link href="/pricing" className="hover:text-foreground transition-colors">Planos</Link>
         </nav>
         <div className="flex items-center gap-4">
           <Link href="/auth/login">
-            <Button variant="ghost" className="text-sm">Log in</Button>
+            <Button variant="ghost" className="text-sm">Entrar</Button>
           </Link>
           <Link href="/auth/signup">
-            <Button className="bg-accent hover:bg-accent/90 text-white font-medium px-6">Get Started</Button>
+            <Button className="bg-accent hover:bg-accent/90 text-white font-medium px-6">Criar Conta</Button>
           </Link>
         </div>
       </header>
@@ -34,27 +34,29 @@ export default function LandingPage() {
       <main className="flex-1">
         <section className="px-6 pt-20 pb-32 text-center max-w-5xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-headline font-bold leading-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
-            Create Cinematic Consistency <br />With AI Precision
+            Crie Vídeos Cinematográficos<br />Com Precisão de IA
           </h1>
           <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            The world's first AI video engine designed for professional-grade consistency. 
-            Keep your characters, environments, and lighting identical across every shot.
+            O primeiro motor de vídeo com IA projetado para consistência profissional.
+            Mantenha personagens, ambientes e iluminação idênticos em cada cena.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/auth/signup">
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-white px-8 h-14 text-lg">
-                Create Your Video <ArrowRight className="ml-2 w-5 h-5" />
+                Criar Seu Vídeo <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="px-8 h-14 text-lg">
-              <Play className="mr-2 w-5 h-5 fill-current" /> Watch Demo
-            </Button>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="px-8 h-14 text-lg">
+                <Crown className="mr-2 w-5 h-5" /> Ver Planos
+              </Button>
+            </Link>
           </div>
-          
+
           <div className="mt-20 relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
             {heroImage && (
-              <Image 
-                src={heroImage.imageUrl} 
+              <Image
+                src={heroImage.imageUrl}
                 alt={heroImage.description}
                 width={1200}
                 height={600}
@@ -69,47 +71,64 @@ export default function LandingPage() {
         <section id="features" className="px-6 py-24 bg-secondary/30">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl font-headline font-bold mb-4">Unmatched AI Capabilities</h2>
-              <p className="text-muted-foreground">Everything you need to produce studio-quality videos in minutes.</p>
+              <h2 className="text-4xl font-headline font-bold mb-4">Capacidades de IA Incomparáveis</h2>
+              <p className="text-muted-foreground">Tudo que você precisa para produzir vídeos de qualidade de estúdio em minutos.</p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               <div className="p-8 rounded-2xl glass-panel hover:border-primary/50 transition-all group">
                 <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary transition-colors">
                   <Layers className="text-primary group-hover:text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">Total Consistency</h3>
+                <h3 className="text-xl font-bold mb-3">Consistência Total</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Our Character Profile DNA ensures the same face, body, and clothing across all clips. No more flickering characters.
+                  Nosso sistema de DNA de Personagem garante o mesmo rosto, corpo e roupa em todos os clipes. Sem personagens piscando.
                 </p>
               </div>
-              
+
               <div className="p-8 rounded-2xl glass-panel hover:border-accent/50 transition-all group">
                 <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-6 group-hover:bg-accent transition-colors">
                   <Sparkles className="text-accent group-hover:text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">Cinematic Refinement</h3>
+                <h3 className="text-xl font-bold mb-3">Refinamento Cinematográfico</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Utilize advanced AI engines to refine every scene with professional lighting, camera angles, and high-fidelity textures.
+                  Utilize motores de IA avançados para refinar cada cena com iluminação profissional, ângulos de câmera e texturas de alta fidelidade.
                 </p>
               </div>
-              
+
               <div className="p-8 rounded-2xl glass-panel hover:border-white/20 transition-all group">
                 <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-white transition-colors">
                   <Video className="text-white group-hover:text-background" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">Motion Generation</h3>
+                <h3 className="text-xl font-bold mb-3">Geração de Movimento</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Generate stunning high-definition clips with the latest video models. Perfect movement, physics, and realism.
+                  Gere clipes de alta definição com os modelos de vídeo mais recentes. Movimento perfeito, física e realismo.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing CTA */}
+        <section className="px-6 py-24">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl font-headline font-bold mb-4">Comece a Criar Hoje</h2>
+            <p className="text-muted-foreground mb-8 text-lg">
+              Planos a partir de <span className="text-accent font-bold">R$ 197,90/mês</span>
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <Link href="/pricing">
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white px-8 h-14 text-lg glowing-accent">
+                  Ver Planos e Preços
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
       <footer className="px-6 py-12 border-t border-white/5 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Viralizoou. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Viralizoou. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

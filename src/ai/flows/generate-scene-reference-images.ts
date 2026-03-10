@@ -2,10 +2,11 @@
 'use server';
 /**
  * @fileOverview Gera capturas visuais iniciais para as cenas baseadas no roteiro.
+ * Usa gemini-3.1-flash-image-preview para gerar imagens de referência.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const GenerateSceneReferenceImagesInputSchema = z.object({
   scriptDetails: z.object({
@@ -52,20 +53,30 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
     const referenceImageUrls: string[] = [];
 
     for (let i = 0; i < sceneDescriptionsToUse.length; i++) {
-      const scenePrompt = `Produção cinematográfica profissional de alta fidelidade: ${sceneDescriptionsToUse[i]}. Foco principal: ${characterDescription}. Estilo visual consistente, iluminação HDR, fotorrealismo extremo, composição limpa.`;
+      const scenePrompt = `Gere uma imagem cinematográfica de alta fidelidade para a seguinte cena de produção profissional: ${sceneDescriptionsToUse[i]}. Personagem principal: ${characterDescription}. Estilo visual: ultra-realismo, iluminação HDR cinematográfica, fotorrealismo extremo, composição limpa, resolução máxima. A imagem deve parecer um frame de um filme hollywoodiano.`;
 
       try {
-        const { candidates } = await ai.generate({
-          model: 'googleai/gemini-pro-vision', // Changed model to googleai/gemini-pro-vision
-          contents: [{ text: scenePrompt }],
+        const { media } = await ai.generate({
+          model: 'googleai/gemini-3.1-flash-image-preview',
+          prompt: [{ text: scenePrompt }],
+          config: {
+            responseModalities: ['IMAGE', 'TEXT'],
+            safetySettings: [
+              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+              { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' },
+            ]
+          }
         });
 
-        if (candidates && candidates.length > 0 && candidates[0].media && candidates[0].media.length > 0) {
-          referenceImageUrls.push(candidates[0].media[0].url);
+        if (media && media.url) {
+          referenceImageUrls.push(media.url);
         }
       } catch (error: any) {
-        console.error("Error generating image for scene:", sceneDescriptionsToUse[i], error);
-        // Silently continue to next scene if one fails, to return what was possible
+        console.error("Erro ao gerar imagem para cena:", sceneDescriptionsToUse[i], error?.message || error);
+        // Continua para a próxima cena se uma falhar
       }
     }
 
