@@ -55,25 +55,16 @@ const generateSceneReferenceImagesFlow = ai.defineFlow(
       const scenePrompt = `Produção cinematográfica profissional de alta fidelidade: ${sceneDescriptionsToUse[i]}. Foco principal: ${characterDescription}. Estilo visual consistente, iluminação HDR, fotorrealismo extremo, composição limpa.`;
 
       try {
-        const { media } = await ai.generate({
-          model: 'googleai/gemini-3.1-flash-image-preview',
-          prompt: scenePrompt,
-          config: {
-            responseModalities: ['IMAGE', 'TEXT'],
-            safetySettings: [
-              { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-              { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-              { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-              { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-              { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' },
-            ]
-          }
+        const { candidates } = await ai.generate({
+          model: 'googleai/gemini-pro-vision', // Changed model to googleai/gemini-pro-vision
+          contents: [{ text: scenePrompt }],
         });
 
-        if (media && media.url) {
-          referenceImageUrls.push(media.url);
+        if (candidates && candidates.length > 0 && candidates[0].media && candidates[0].media.length > 0) {
+          referenceImageUrls.push(candidates[0].media[0].url);
         }
       } catch (error: any) {
+        console.error("Error generating image for scene:", sceneDescriptionsToUse[i], error);
         // Silently continue to next scene if one fails, to return what was possible
       }
     }
